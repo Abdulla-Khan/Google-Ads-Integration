@@ -22,14 +22,8 @@ class _MyAppState extends State<MyApp> {
   RewardedAd? rewardedAd;
   int rewardedAdAttempts = 0;
 
-  ///Ad request settings
-  static const AdRequest request = AdRequest(
-      // keywords: ['', ''],
-      // contentUrl: '',
-      // nonPersonalizedAds: false
-      );
+  static const AdRequest request = AdRequest();
 
-  ///function to load static banner ad
   void loadStaticBannerAd() {
     staticAd = BannerAd(
         adUnitId: BannerAd.testAdUnitId,
@@ -41,8 +35,6 @@ class _MyAppState extends State<MyApp> {
           });
         }, onAdFailedToLoad: (ad, error) {
           ad.dispose();
-
-          print('ad failed to load ${error.message}');
         }));
 
     staticAd.load();
@@ -60,14 +52,11 @@ class _MyAppState extends State<MyApp> {
           });
         }, onAdFailedToLoad: (ad, error) {
           ad.dispose();
-
-          print('ad failed to load ${error.message}');
         }));
 
     inlineAd.load();
   }
 
-  ///function to create Interstitial ad
   void createInterstialAd() {
     InterstitialAd.load(
         adUnitId: InterstitialAd.testAdUnitId,
@@ -78,7 +67,6 @@ class _MyAppState extends State<MyApp> {
         }, onAdFailedToLoad: (error) {
           interstitialAttempts++;
           interstitialAd = null;
-          print('falied to load ${error.message}');
 
           if (interstitialAttempts <= maxAttempts) {
             createInterstialAd();
@@ -86,87 +74,30 @@ class _MyAppState extends State<MyApp> {
         }));
   }
 
-  ///function to show the Interstitial ad after loading it
-  ///this function will get called when we click on the button
   void showInterstitialAd() {
     if (interstitialAd == null) {
-      print('trying to show before loading');
       return;
     }
 
-    interstitialAd!.fullScreenContentCallback = FullScreenContentCallback(
-        onAdShowedFullScreenContent: (ad) => print('ad showed $ad'),
-        onAdDismissedFullScreenContent: (ad) {
-          ad.dispose();
-          createInterstialAd();
-        },
-        onAdFailedToShowFullScreenContent: (ad, error) {
-          ad.dispose();
-          print('failed to show the ad $ad');
+    interstitialAd!.fullScreenContentCallback =
+        FullScreenContentCallback(onAdDismissedFullScreenContent: (ad) {
+      ad.dispose();
+      createInterstialAd();
+    }, onAdFailedToShowFullScreenContent: (ad, error) {
+      ad.dispose();
 
-          createInterstialAd();
-        });
+      createInterstialAd();
+    });
 
     interstitialAd!.show();
     interstitialAd = null;
   }
-
-  ///function to create rewarded ad
-  // void createRewardedAd() {
-  //   RewardedAd.load(
-  //       adUnitId: RewardedAd.testAdUnitId,
-  //       request: request,
-  //       rewardedAdLoadCallback: RewardedAdLoadCallback(
-  //           onAdLoaded: (ad){
-  //             rewardedAd = ad;
-  //             rewardedAdAttempts = 0;
-  //           },
-  //           onAdFailedToLoad: (error){
-  //             rewardedAdAttempts++;
-  //             rewardedAd = null;
-  //             print('failed to load ${error.message}');
-
-  //             if(rewardedAdAttempts <= maxAttempts){
-  //               createRewardedAd();
-  //             }
-  //           })
-  //   );
-  // }
-
-  ///function to show the rewarded ad after loading it
-  ///this function will get called when we click on the button
-  // void showRewardedAd() {
-  //   if(rewardedAd == null){
-  //     print('trying to show before loading');
-  //     return;
-  //   }
-
-  //   rewardedAd!.fullScreenContentCallback = FullScreenContentCallback(
-  //       onAdShowedFullScreenContent: (ad) => print('ad showed $ad'),
-  //       onAdDismissedFullScreenContent: (ad) {
-  //         ad.dispose();
-  //         createRewardedAd();
-  //       },
-  //       onAdFailedToShowFullScreenContent: (ad, error){
-  //         ad.dispose();
-  //         print('failed to show the ad $ad');
-
-  //         createRewardedAd();
-  //       }
-  //   );
-
-  //   rewardedAd!.show(onUserEarnedReward: (ad, reward){
-  //     print('reward video ${reward.amount} ${reward.type}');
-  //   });
-  //   rewardedAd = null;
-  // }
 
   @override
   void initState() {
     loadStaticBannerAd();
     loadInlineBannerAd();
     createInterstialAd();
-    // createRewardedAd();
     super.initState();
   }
 
@@ -174,7 +105,6 @@ class _MyAppState extends State<MyApp> {
   void dispose() {
     super.dispose();
 
-    ///Don't forget to dispose the ads
     staticAd.dispose();
     inlineAd.dispose();
     interstitialAd?.dispose();
@@ -215,12 +145,6 @@ class _MyAppState extends State<MyApp> {
                           showInterstitialAd();
                         },
                         child: const Text('Show Interstitial Ad')),
-                    // const SizedBox(width: 50,),
-                    ElevatedButton(
-                        onPressed: () {
-                          // showRewardedAd();
-                        },
-                        child: const Text('Show Rewarded Ad')),
                   ],
                 ),
                 const SizedBox(
